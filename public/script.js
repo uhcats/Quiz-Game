@@ -17,6 +17,13 @@ function fillQuestionElements(data) {
     return;
   }
 
+
+  if (data.loser === true) {
+    gameBoard.style.display = 'none';
+    h2.innerText = 'Nie poszło tym razem, spróbuj ponownie';
+    return
+  }
+
   // To data question nie odwwołuje nam się do pobranego wyżej question tylko w momencie wywołania do promise
   question.innerText = data.question;
 
@@ -56,7 +63,7 @@ function sendAnswer(answerIndex) {
 
 }
 
-const buttons = document.querySelectorAll('button');
+const buttons = document.querySelectorAll('.answer-btn');
 
 for (const button of buttons) {
   button.addEventListener('click', function () {
@@ -64,3 +71,49 @@ for (const button of buttons) {
     sendAnswer(answerIndex);
   })
 }
+
+const tipDiv = document.querySelector('#tip');
+
+function handleFriendsAnswer(data) {
+  tipDiv.innerText = data.text;
+}
+
+
+function callToAFriend() {
+  fetch('/help/friend', {
+      method: 'GET'
+    })
+    .then(r => r.json())
+    .then(data => {
+      handleFriendsAnswer(data)
+    })
+}
+document.querySelector('#callToAFriend').addEventListener('click', callToAFriend);
+
+
+
+
+
+function handleHalfOnHalf(data) {
+  if (typeof data.text === 'string') {
+    tipDiv.innerText = data.text;
+  } else {
+    for (const button of buttons) {
+      if (data.answersToRemove.indexOf(button.innerText) > -1) {
+        button.innerText = "";
+      }
+    }
+  }
+}
+
+
+function halfOnHalf() {
+  fetch('/help/half', {
+      method: 'GET'
+    })
+    .then(r => r.json())
+    .then(data => {
+      handleHalfOnHalf(data)
+    })
+}
+document.querySelector('#halfOnHalf').addEventListener('click', halfOnHalf);
